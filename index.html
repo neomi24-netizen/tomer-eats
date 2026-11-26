@@ -1,0 +1,681 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#F6FBFF">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="תומר אוכל">
+<title>תומר אוכל</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: sticky header with progress meter, one scrolling view, bottom tab bar. Pastel candy palette, round shapes. */
+:root{
+  --bg:#F6FBFF; --card:#FFFFFF; --fg:#2B3A4A; --muted:#6B7D8F; --line:#E0ECF5;
+  --accent:#1F83BD; --accent-fg:#FFFFFF;
+  --mint:#C5EBD9; --peach:#FFD9C2; --soft:#D4EBFA; --sky:#B9E0F5; --butter:#FFF0A8; --rose:#FFCFDD;
+  --good:#2F9E6B; --warn:#C97A12; --bad:#D2455F; --warnbg:#FFF1D6; --badbg:#FFE1E7;
+  --font:'Rubik','Heebo',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#14222E; --card:#1E3040; --fg:#EAF4FB; --muted:#9FB6C7; --line:#2C4457;
+  --accent:#7CC8F2; --accent-fg:#10202E;
+  --mint:#2E5A4A; --peach:#6A4636; --soft:#27506B; --sky:#2F5472; --butter:#6A5F22; --rose:#6B3548;
+  --good:#6FD7A5; --warn:#F2B455; --bad:#FF8CA3; --warnbg:#4A3A18; --badbg:#53283A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#14222E; --card:#1E3040; --fg:#EAF4FB; --muted:#9FB6C7; --line:#2C4457;
+  --accent:#7CC8F2; --accent-fg:#10202E;
+  --mint:#2E5A4A; --peach:#6A4636; --soft:#27506B; --sky:#2F5472; --butter:#6A5F22; --rose:#6B3548;
+  --good:#6FD7A5; --warn:#F2B455; --bad:#FF8CA3; --warnbg:#4A3A18; --badbg:#53283A; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);font-size:16px;line-height:1.5;direction:rtl;
+  padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px));padding-block:0 96px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+.wrap{max-width:640px;margin:0 auto}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);padding:12px 0 10px}
+.brand{display:flex;align-items:center;gap:10px;justify-content:space-between}
+.brand h1{margin:0;font-size:1.4rem;font-weight:700;letter-spacing:-.01em}
+.brand h1 span{color:var(--accent)}
+.count{font-weight:700;font-variant-numeric:tabular-nums}
+.count small{color:var(--muted);font-weight:500}
+.hmeters{display:flex;gap:12px;flex:none}
+.hmeter{width:70px;flex:none;display:block;padding:0}
+.mcap{font-size:.68rem;color:var(--muted);margin-top:2px}
+.brand h1{white-space:nowrap}
+.hmeter .count{font-size:.9rem;text-align:start}
+.meter{position:relative;height:10px;border-radius:99px;background:var(--soft);margin-top:4px;overflow:hidden}
+.meter i{position:absolute;inset:0 0 0 auto;width:0;background:linear-gradient(270deg,var(--mint),var(--sky),var(--accent));border-radius:99px;transition:width .5s}
+.avatar{width:72px;height:72px;border-radius:50%;flex:none;background:var(--peach);color:var(--fg);display:grid;place-items:center;font-weight:700;font-size:1.6rem;overflow:hidden;padding:0;border:3px solid var(--card);box-shadow:0 0 0 2px var(--sky)}
+.avatar img{width:100%;height:100%;object-fit:cover;display:block}
+h2{font-size:1.25rem;margin:20px 0 8px}
+h3{font-size:1.05rem;margin:0 0 6px}
+.card{background:var(--card);border-radius:20px;padding:14px;border:1px solid var(--line)}
+.stack{display:flex;flex-direction:column;gap:10px}
+.row{display:flex;align-items:center;gap:10px;min-width:0}
+.grow{flex:1;min-width:0}
+.muted{color:var(--muted);font-size:.9rem}
+.tabs{position:fixed;inset:auto 0 0 0;z-index:25;background:var(--card);border-top:1px solid var(--line);
+  display:flex;justify-content:center;padding:6px max(8px,env(safe-area-inset-left,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-right,0px))}
+.tabs div{display:flex;width:100%;max-width:640px;gap:4px}
+.tab{flex:1;padding:8px 2px;border-radius:14px;font-size:.78rem;font-weight:500;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px}
+.tab svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tab[aria-selected="true"]{background:var(--soft);color:var(--fg)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:7px 14px;border-radius:99px;background:var(--card);border:1.5px solid var(--line);font-size:.9rem;font-weight:500}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+input[type=text],input[type=search],input[type=date],textarea,select{width:100%;padding:11px 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--card)}
+textarea{min-height:84px;resize:vertical}
+.btn{padding:11px 18px;border-radius:99px;background:var(--accent);color:var(--accent-fg);font-weight:600}
+.btn.soft{background:var(--soft);color:var(--fg)}
+.btn.ghost{color:var(--fg);background:none;border:1.5px solid var(--line)}
+.btn.danger{background:var(--badbg);color:var(--bad)}
+.btn.small{padding:6px 12px;font-size:.85rem}
+.food{display:flex;align-items:center;gap:10px;width:100%;text-align:start;padding:7px 10px;border-radius:14px;background:var(--card);border:1px solid var(--line)}
+.dot{width:14px;height:14px;border-radius:50%;flex:none;border:2px solid var(--line)}
+.dot.love{background:var(--good);border-color:var(--good)} .dot.ok{background:var(--butter);border-color:var(--warn)} .dot.no{background:var(--rose);border-color:var(--bad)}
+.tag{display:inline-block;padding:2px 9px;border-radius:99px;font-size:.75rem;font-weight:600;background:var(--peach);color:var(--fg);white-space:nowrap}
+.tag.w{background:var(--warnbg);color:var(--warn)} .tag.g{background:var(--mint)} .tag.b{background:var(--badbg);color:var(--bad)}
+.catbar{display:flex;align-items:center;gap:10px;margin:18px 0 8px}
+.catbar h2{margin:0}
+.catbar .n{font-size:.85rem;color:var(--muted)}
+.notice{padding:11px 14px;border-radius:16px;background:var(--warnbg);color:var(--fg);border:1px solid var(--warn);font-size:.92rem}
+.notice.bad{background:var(--badbg);border-color:var(--bad)}
+.notice.ok{background:var(--mint);border-color:var(--good)}
+.sheet-bg{position:fixed;inset:0;z-index:40;background:rgba(20,40,60,.45);display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--bg);width:100%;max-width:640px;max-height:92%;overflow:auto;border-radius:26px 26px 0 0;padding:18px max(16px,env(safe-area-inset-left,0px)) calc(20px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-right,0px))}
+.sheet label{display:block;font-weight:600;margin:12px 0 6px}
+.days{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
+.day{flex:none;min-width:48px;padding:8px 10px;border-radius:14px;background:var(--card);border:1.5px solid var(--line);text-align:center;font-weight:600;font-size:.9rem}
+.day[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.day small{display:block;font-weight:400;opacity:.8}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{border-radius:18px;padding:10px 6px;text-align:center}
+.stat b{display:block;font-size:1.5rem;font-variant-numeric:tabular-nums}
+.stat span{font-size:.78rem}
+.check{width:26px;height:26px;border-radius:9px;border:2px solid var(--line);flex:none;display:grid;place-items:center;background:var(--card)}
+.check[aria-checked="true"]{background:var(--good);border-color:var(--good);color:#fff}
+ul.plain{list-style:none;margin:0;padding:0}
+.hint{font-size:.85rem;color:var(--muted)}
+.x{padding:4px 10px;border-radius:99px;color:var(--muted);font-size:1.1rem}
+.thumb{width:38px;height:38px;border-radius:12px;flex:none;background:var(--soft);display:grid;place-items:center;font-weight:700;overflow:hidden;position:relative;padding:0;color:var(--fg)}
+.thumb{font-size:1.4rem}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb.big{width:84px;height:84px;border-radius:20px;font-size:1.8rem}
+.rate{display:inline-flex;gap:3px;vertical-align:middle}
+.rate i{width:8px;height:8px;border-radius:50%;background:var(--line)}
+.rate i.on{background:var(--good)}
+.food .name{font-weight:600;line-height:1.25}
+.food .sub{display:block;font-size:.78rem;color:var(--muted);line-height:1.3}
+.algstrip{display:flex;gap:6px;flex-wrap:wrap}
+.algchip{padding:5px 10px;border-radius:99px;font-size:.8rem;font-weight:600;background:var(--card);border:1.5px solid var(--line);color:var(--muted)}
+.algchip.on{background:var(--mint);border-color:var(--good);color:var(--fg)}
+.algchip.bad{background:var(--badbg);border-color:var(--bad);color:var(--bad)}
+.meal{border-top:1px dashed var(--line);padding-top:10px}
+.meal h4{margin:0 0 6px;font-size:.95rem;display:flex;align-items:center;justify-content:space-between}
+.tabs .tab{font-size:.72rem}
+.rec{display:flex;gap:10px;align-items:flex-start}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+[hidden]{display:none!important}
+img{max-width:100%}
+</style>
+
+</head>
+<body>
+<script>
+if(!window.claude)window.claude={use:async()=>null};
+document.documentElement.lang='he';document.documentElement.dir='rtl';
+const ALG={e:'ביצה',m:'חלב',p:'בוטנים',t:'אגוזי עץ',s:'שומשום',w:'חיטה/גלוטן',o:'סויה',f:'דגים',x:'פירות ים'};
+const W_NUT='טחון או כחמאה מדוללת, לעולם לא שלם';
+const RAW=[
+['ירקות',[['בטטה'],['דלעת'],['גזר','', 'מבושל או מגורר, לא נא'],['קישוא'],['ברוקולי'],['כרובית'],['תפוח אדמה'],['סלק'],['חציל'],['עגבנייה'],['מלפפון','','בפסים או מקלות עבים, לא פרוסות דקות'],['פלפל אדום'],['אפונה','','למעוך קלות'],['שעועית ירוקה'],['תרד'],['תירס','','להגיש גרגרים מרוסקים'],['פטריות'],['כרוב'],['אספרגוס'],['בצל (מבושל)']]],
+['פירות',[['אבוקדו'],['בננה'],['אגס'],['תפוח','','מבושל או מגורר, לא נא'],['אפרסק'],['מנגו'],['אפרסמון'],['תות'],['אוכמניות','','למעוך'],['פטל'],['אבטיח','','בלי גרעינים'],['מלון'],['שזיף'],['משמש'],['תפוז'],['קלמנטינה'],['קיווי'],['תמר','','בלי גרעין, לקצוץ'],['ענבים','','לחתוך לרבעים'],['רימון','','גרגרים מרוסקים'],['אננס'],['דובדבן','','בלי גרעין, חצוי']]],
+['דגנים',[['שיבולת שועל'],['אורז'],['קינואה'],['פולנטה'],['פסטה','w'],['לחם','w'],['פיתה','w'],['קוסקוס','w'],['בורגול','w'],['פתיתים','w']]],
+['קטניות',[['עדשים כתומות'],['עדשים שחורות'],['גרגירי חומוס','','למעוך'],['שעועית לבנה'],['שעועית שחורה'],['פול'],['אדממה','o','למעוך']]],
+['חלבונים',[['ביצה','e','מבושלת היטב'],['עוף'],['הודו'],['בקר'],['כבש'],['לשון בקר'],['סלמון','f','לבדוק עצמות'],['דג לבן','f','לבדוק עצמות'],['טונה','f','בכמויות קטנות'],['טופו','o']]],
+['חלב ומוצריו',[['יוגורט טבעי','m'],['גבינה לבנה','m'],['קוטג\'','m','מלוח, כמות קטנה'],['גבינה צהובה','m','מלוחה, כמות קטנה'],['לבנה','m'],['גבינת עיזים','m','מלוחה, כמות קטנה'],['מוצרלה','m','מלוחה, לגרר או לחתוך דק']]],
+['אגוזים וזרעים',[['בוטנים','p',W_NUT],['במבה','p','לדלל במים או חלב'],['טחינה','s'],['שומשום','s','טחון'],['שקדים','t',W_NUT],['אגוזי מלך','t',W_NUT],['קשיו','t',W_NUT],['פיסטוק','t',W_NUT],['גרעיני חמניות או דלעת','','טחונים'],['צ\'יה או פשתן','','טחונים או ספוגים']]],
+['תבלינים ושמנים',[['שמן זית'],['שום (מבושל)'],['כמון'],['כורכום'],['קינמון'],['פפריקה מתוקה'],['פטרוזיליה'],['כוסברה'],['נענע'],['לימון']]]
+];
+const FOODS=[];RAW.forEach(([cat,l])=>l.forEach(([n,a,w])=>FOODS.push({id:n,name:n,cat,al:(a||'').split('').filter(Boolean),warn:w||''})));
+const CATS=RAW.map(r=>r[0]);
+const REACT={love:'אהב',ok:'בסדר',no:'לא אהב'};
+const FORMS=['אצבעות','נתח לאחיזה','מרוסק','מחית','כפית','ביד'];
+const RR=['ללא תגובה','פריחה או אדמומיות','הקאה','נפיחות','שלשול','עצירות','אחר'];
+const DAYN=['א','ב','ג','ד','ה','ו','ש'];
+const DAYF=['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+const REC=[
+['אצבעות בטטה אפויות',['בטטה','שמן זית','קינמון'],'חותכים לאצבעות עבות, מערבבים עם מעט שמן זית וקינמון ואופים 25 דקות ב-200 מעלות עד שרכים.'],
+['פנקייק בננה ושיבולת שועל',['בננה','ביצה','שיבולת שועל'],'מועכים בננה, מערבבים עם ביצה ושיבולת שועל טחונה, ומטגנים בפחות שמן בפנקייקים קטנים וקלים לאחיזה.'],
+['מאפינס ביצה וירקות',['ביצה','קישוא','גזר','פטרוזיליה'],'מערבבים ביצים עם ירקות מגוררים ופטרוזיליה, אופים בתבנית מאפינס 15 דקות ב-180 מעלות.'],
+['קציצות עוף וקישוא',['עוף','קישוא','פטרוזיליה','שיבולת שועל'],'מערבבים עוף טחון עם קישוא מגורר, פטרוזיליה ושיבולת שועל, מעצבים אצבעות ואופים עד שמבושלות היטב.'],
+['כדורי עדשים וגזר',['עדשים כתומות','גזר','כמון','אורז'],'מבשלים עדשים ואורז, מועכים עם גזר מגורר וכמון, מכדררים ואופים 20 דקות.'],
+['פסטה ברוטב עגבנייה וקישוא',['פסטה','עגבנייה','קישוא','שמן זית'],'מבשלים פסטה רכה (פוזילי נאחז טוב), ומגישים עם רוטב עגבנייה וקישוא שבושלו עד רכות.'],
+['ברוקולי וכרובית בטחינה',['ברוקולי','כרובית','טחינה'],'מאדים ניצנים גדולים עד שרכים, ומטבלים בטחינה מדוללת בקצת מים.'],
+['אבוקדו על פיתה',['אבוקדו','פיתה','לימון'],'מועכים אבוקדו עם כמה טיפות לימון, מורחים על רצועות פיתה.'],
+['דייסת שיבולת שועל עם תפוח',['שיבולת שועל','תפוח','קינמון'],'מבשלים שיבולת שועל במים, מוסיפים תפוח מגורר וקינמון. אפשר להגיש בכדורים או בכפית.'],
+['אצבעות דלעת וכורכום',['דלעת','שמן זית','כורכום'],'פרוסות דלעת עבות עם שמן זית וכורכום, אופים 25 דקות.'],
+['קציצות סלמון ותפוח אדמה',['סלמון','תפוח אדמה','פטרוזיליה','ביצה'],'מועכים תפוח אדמה מבושל עם סלמון מבושל (בלי עצמות), ביצה ופטרוזיליה, מעצבים ואופים.'],
+['לביבות תירס וגבינה',['תירס','ביצה','גבינה לבנה'],'מערבבים גרגירי תירס מרוסקים, ביצה וגבינה לבנה, ומטגנים בכף קטנה.'],
+['יוגורט עם פירות',['יוגורט טבעי','פטל','בננה'],'יוגורט עבה עם פירות מעוכים, להגשה בכפית עם בוסט עצמאי.'],
+['עוף בטחינה ולימון',['עוף','טחינה','לימון'],'רצועות עוף אפויות עד רכות, עם טחינה מדוללת וטיפת לימון.'],
+['אורז עדשים ובצל',['אורז','עדשים כתומות','בצל (מבושל)','כמון'],'מבשלים עד שמתרסק, מכדררים או מגישים בכף.'],
+['אצבעות חציל אפויות',['חציל','שמן זית','עגבנייה'],'רצועות חציל עם שמן זית אפויות 25 דקות, מוגשות עם עגבנייה מרוסקת.'],
+['פרוסות פולנטה ומוצרלה',['פולנטה','מוצרלה','שמן זית'],'מבשלים פולנטה, מצננים וחותכים למלבנים, צולים עם מוצרלה מגוררת דק.'],
+['כדורי אורז וברוקולי',['אורז','ברוקולי','ביצה'],'מערבבים אורז מבושל עם ברוקולי קצוץ וביצה, מכדררים ואופים.'],
+['מרק עדשים וגזר',['עדשים כתומות','גזר','בצל (מבושל)','כורכום'],'מבשלים ומועכים. מגישים בכפית או לטבילה עם פרוסות לחם.']
+];
+const NUTN={i:'ברזל',p:'חלבון',c:'סידן',o:'אומגה 3',v:'ויטמין C',a:'ויטמין A',f:'סיבים',h:'שומן בריא',z:'אבץ'};
+const NUT={'בטטה':'af','דלעת':'af','גזר':'af','קישוא':'v','ברוקולי':'vf','כרובית':'vf','תפוח אדמה':'vf','סלק':'f','חציל':'f','עגבנייה':'v','פלפל אדום':'va','אפונה':'pfi','שעועית ירוקה':'fv','תרד':'iaf','תירס':'f','כרוב':'vf','אספרגוס':'fv','בצל (מבושל)':'f',
+'אבוקדו':'hf','בננה':'f','אגס':'f','תפוח':'f','אפרסק':'v','מנגו':'av','אפרסמון':'af','תות':'v','אוכמניות':'vf','פטל':'vf','מלון':'va','שזיף':'f','משמש':'af','תפוז':'v','קלמנטינה':'v','קיווי':'vf','תמר':'f','רימון':'vf','אננס':'v',
+'שיבולת שועל':'if','קינואה':'pif','בורגול':'f','עדשים כתומות':'ipf','עדשים שחורות':'ipf','גרגירי חומוס':'ipf','שעועית לבנה':'ipf','שעועית שחורה':'ipf','פול':'ipf','אדממה':'pif',
+'ביצה':'pi','עוף':'p','הודו':'pz','בקר':'piz','כבש':'piz','לשון בקר':'piz','סלמון':'po','דג לבן':'p','טונה':'po','טופו':'pci',
+'יוגורט טבעי':'pc','גבינה לבנה':'pc','קוטג\'':'pc','גבינה צהובה':'pc','לבנה':'pc','גבינת עיזים':'pc','מוצרלה':'pc',
+'בוטנים':'ph','במבה':'p','טחינה':'chi','שומשום':'chi','שקדים':'ch','אגוזי מלך':'oh','קשיו':'ihz','פיסטוק':'ph','גרעיני חמניות או דלעת':'zhi','צ\'יה או פשתן':'of','שמן זית':'h','פטרוזיליה':'v','לימון':'v'};
+FOODS.forEach(f=>f.nu=(NUT[f.id]||'').split('').filter(Boolean));
+const MEALS=[['b','ארוחת בוקר'],['l','ארוחת צהריים'],['d','ארוחת ערב']];
+REC.push(
+['פנקייק תפוח וקינמון',['תפוח','ביצה','שיבולת שועל','קינמון'],'מגרדים תפוח, מערבבים עם ביצה, שיבולת שועל וקינמון, ומטגנים פנקייקים קטנים.'],
+['חביתה אפויה עם תרד',['ביצה','תרד','מוצרלה'],'קוצצים תרד דק, מערבבים עם ביצים ומוצרלה מגוררת, אופים בתבנית ומחתכים לרצועות.'],
+['לביבות קישוא',['קישוא','ביצה','פטרוזיליה','שיבולת שועל'],'מגרדים קישוא ומסחטים היטב, מערבבים עם ביצה, פטרוזיליה ושיבולת שועל, ואופים בכפות.'],
+['לביבות בטטה',['בטטה','ביצה','קינמון'],'מגרדים בטטה ומערבבים עם ביצה וקינמון, אופים 15 דקות עד שמזהיבות.'],
+['קציצות הודו וגזר',['הודו','גזר','בצל (מבושל)','פטרוזיליה','שיבולת שועל'],'מערבבים הודו טחון עם גזר מגורר, בצל מבושל, פטרוזיליה ושיבולת שועל. מעצבים לאצבעות ואופים עד שמבושלות היטב.'],
+['בקר מבושל רך עם תפוח אדמה',['בקר','תפוח אדמה','גזר','בצל (מבושל)'],'מבשלים נתחי בקר במים הרבה זמן עד שמתפרקים, מוסיפים תפוח אדמה וגזר. מגישים ברצועות רכות או מרוסק.'],
+['כבש מבושל עם תפוח אדמה',['כבש','תפוח אדמה','בצל (מבושל)','שום (מבושל)','פפריקה מתוקה'],'מבשלים כבש עם בצל ושום עד רכות מאוד, ומוסיפים תפוח אדמה. מגישים בסיבים ארוכים לאחיזה.'],
+['אצבעות טופו אפויות',['טופו','שמן זית','כמון'],'חותכים טופו מוצק לאצבעות, מורחים מעט שמן זית וכמון ואופים 20 דקות.'],
+['דג לבן אפוי בעשבי תיבול',['דג לבן','לימון','פטרוזיליה','שמן זית'],'אופים פילה דג עם לימון, פטרוזיליה ושמן זית. מפרקים לפירורים גדולים ובודקים היטב שאין עצמות.'],
+['סלמון אפוי עם ברוקולי',['סלמון','ברוקולי','לימון'],'אופים סלמון וברוקולי יחד. מפרקים את הסלמון לנתחים רכים ובודקים עצמות.'],
+['טונה ותפוח אדמה',['טונה','תפוח אדמה','פטרוזיליה'],'מועכים תפוח אדמה מבושל עם מעט טונה בשמן זית (בכמויות קטנות) ופטרוזיליה, ומעצבים אצבעות.'],
+['חומוס ביתי לטבילה',['גרגירי חומוס','טחינה','לימון','שמן זית'],'טוחנים גרגירי חומוס מבושלים רכים עם טחינה, לימון ושמן זית, בלי מלח. מגישים לטבילת מקלות ירק מאודים.'],
+['פלאפל אפוי',['גרגירי חומוס','פטרוזיליה','כוסברה','כמון','שמן זית'],'טוחנים חומוס מבושל עם עשבי תיבול וכמון, מכדררים לכדורים שטוחים ואופים 20 דקות.'],
+['קציצות שעועית שחורה ובטטה',['שעועית שחורה','בטטה','כמון'],'מועכים שעועית עם בטטה אפויה וכמון, מעצבים ואופים 20 דקות.'],
+['שעועית לבנה בעגבנייה',['שעועית לבנה','עגבנייה','בצל (מבושל)','שמן זית'],'מבשלים שעועית עם עגבנייה ובצל עד שנהיית רכה, מועכים חלקית.'],
+['קינואה עם ירקות',['קינואה','גזר','קישוא','פטרוזיליה'],'מבשלים קינואה עם ירקות קצוצים דק, מכדררים או מגישים בכפית.'],
+['כדורי קינואה ומוצרלה',['קינואה','ביצה','מוצרלה'],'מערבבים קינואה מבושלת עם ביצה ומוצרלה מגוררת, מכדררים ואופים.'],
+['פתיתים עם ירקות',['פתיתים','גזר','אפונה','שמן זית'],'מבשלים פתיתים בלי מלח, מוסיפים גזר מבושל ואפונה מרוסקת קלות.'],
+['קוסקוס עם דלעת',['קוסקוס','דלעת','כמון'],'מערבבים קוסקוס מוכן עם דלעת מרוסקת וכמון, מכדררים לאחיזה.'],
+['בורגול עם עגבנייה ונענע',['בורגול','עגבנייה','פטרוזיליה','נענע'],'מבשלים בורגול דק, מערבבים עם עגבנייה מרוסקת ועשבי תיבול.'],
+['פירה בטטה ותפוח',['בטטה','תפוח','קינמון'],'מבשלים בטטה ותפוח עד רכות, מועכים עם קינמון. מגישים בכפית או כרצועות על טוסט.'],
+['תפוח אדמה אפוי עם לבנה',['תפוח אדמה','לבנה','שמן זית'],'אופים תפוח אדמה, פותחים ומועכים, ומגישים עם לבנה.'],
+['פסטה עם תרד וגבינה',['פסטה','תרד','שמן זית','גבינה לבנה'],'מבשלים פסטה רכה, מערבבים עם תרד מוקפץ קצוץ וגבינה לבנה.'],
+['פרנץ\' טוסט בננה',['לחם','ביצה','קינמון','בננה'],'טובלים רצועות לחם בביצה מוקצפת עם קינמון, מטגנים קלות ומגישים עם בננה פרוסה.'],
+['שיבולת שועל אפויה עם פירות',['שיבולת שועל','בננה','אוכמניות','ביצה'],'מועכים בננה, מערבבים עם שיבולת שועל, ביצה ואוכמניות מעוכות, אופים בתבנית ומחתכים לרצועות.'],
+['יוגורט עם תות ושקדים טחונים',['יוגורט טבעי','תות','שקדים'],'יוגורט טבעי עם תות מעוך ומעט שקדים טחונים דק.'],
+['קרם אבוקדו ובננה',['אבוקדו','בננה'],'מועכים אבוקדו עם בננה לקרם חלק. מגישים על רצועות פיתה או בכפית.'],
+['סלט פירות לאחיזה',['מלון','אבטיח','קיווי'],'פירות חתוכים לאצבעות עבות או לנתחים רכים, בלי גרעינים.'],
+['מקלות מלפפון עם לבנה',['מלפפון','לבנה','נענע'],'מקלות מלפפון עבים לטבילה בלבנה עם נענע קצוצה.'],
+['אבוקדו וביצה קשה',['אבוקדו','ביצה'],'מועכים אבוקדו ומגישים עם ביצה קשה חתוכה לרבעים.'],
+['מרק ירקות',['גזר','תפוח אדמה','קישוא','בצל (מבושל)','פטרוזיליה'],'מבשלים ירקות במים עד רכות. מגישים בכפית או מועכים עם פרוסת לחם לטבילה.'],
+['פול מבושל מעוך',['פול','שמן זית','לימון'],'מבשלים פול ומועכים עם שמן זית ולימון.'],
+['פטריות וביצה',['פטריות','ביצה','בצל (מבושל)'],'מוקפצים פטריות ובצל ברכות, מוסיפים ביצה ומערבבים לחביתה רכה.'],
+['במבה מדוללת על בננה',['במבה','בננה'],'ממיסים במבה בקצת מים חמים עד מחית דקה, ומורחים על רצועות בננה.'],
+['חציל בטחינה',['חציל','טחינה','לימון'],'אופים חציל עד שרך, פורסים לרצועות ומגישים עם טחינה מדוללת ולימון.'],
+['סלק אפוי באצבעות',['סלק','שמן זית'],'חותכים סלק לאצבעות, אופים עד רך. עלול לצבוע את החיתול באדום, זה בסדר.'],
+['כרובית אפויה בכורכום',['כרובית','כורכום','שמן זית'],'אופים ניצני כרובית עם כורכום ושמן זית עד שרכים.']
+);
+const AVATAR='';
+
+const EMO={'בטטה':'🍠','דלעת':'🎃','גזר':'🥕','קישוא':'🥒','ברוקולי':'🥦','כרובית':'🥦','תפוח אדמה':'🥔','חציל':'🍆','עגבנייה':'🍅','מלפפון':'🥒','פלפל אדום':'🫑','אפונה':'🫛','שעועית ירוקה':'🫛','תרד':'🥬','תירס':'🌽','פטריות':'🍄','כרוב':'🥬','בצל (מבושל)':'🧅',
+'אבוקדו':'🥑','בננה':'🍌','אגס':'🍐','תפוח':'🍎','אפרסק':'🍑','מנגו':'🥭','תות':'🍓','אוכמניות':'🫐','אבטיח':'🍉','מלון':'🍈','משמש':'🍑','תפוז':'🍊','קלמנטינה':'🍊','קיווי':'🥝','ענבים':'🍇','אננס':'🍍','דובדבן':'🍒',
+'שיבולת שועל':'🥣','אורז':'🍚','קינואה':'🌾','פולנטה':'🌽','פסטה':'🍝','לחם':'🍞','פיתה':'🫓','קוסקוס':'🌾','בורגול':'🌾','עדשים כתומות':'🫘','עדשים שחורות':'🫘','גרגירי חומוס':'🫘','שעועית לבנה':'🫘','שעועית שחורה':'🫘','פול':'🫘','אדממה':'🫛',
+'ביצה':'🥚','עוף':'🍗','הודו':'🦃','בקר':'🥩','כבש':'🥩','לשון בקר':'🥩','סלמון':'🐟','דג לבן':'🐟','טונה':'🐟','יוגורט טבעי':'🥛','גבינה לבנה':'🥛','קוטג\'':'🥛','לבנה':'🥛','גבינה צהובה':'🧀','גבינת עיזים':'🧀','מוצרלה':'🧀',
+'בוטנים':'🥜','במבה':'🥜','שקדים':'🌰','אגוזי מלך':'🌰','קשיו':'🌰','פיסטוק':'🌰','שמן זית':'🫒','שום (מבושל)':'🧄','לימון':'🍋','נענע':'🌿','פטרוזיליה':'🌿','כוסברה':'🌿'};
+FOODS.forEach(f=>f.em=EMO[f.id]||'');
+const KEY='tomer-eats-v1';
+let S={custom:[],logs:{},alg:{},react:[],plan:{},shop:{},recipes:[],photos:{},avatar:'',skips:{}};
+try{const r=localStorage.getItem(KEY);if(r)S=Object.assign(S,JSON.parse(r))}catch(e){}
+let saveFail=false;
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){saveFail=true}}
+const $=s=>document.querySelector(s);
+function h(tag,a,...kids){const e=document.createElement(tag);if(a)for(const k in a){const v=a[k];if(k==='class')e.className=v;else if(k.startsWith('on'))e.addEventListener(k.slice(2),v);else if(k.startsWith('aria-'))e.setAttribute(k,String(v));else if(v===true)e.setAttribute(k,'');else if(v!==false&&v!=null)e.setAttribute(k,v)}
+  kids.flat().forEach(c=>{if(c==null||c===false)return;e.append(c.nodeType?c:document.createTextNode(c))});return e}
+const allFoods=()=>FOODS.concat(S.custom.map(c=>c.nu?c:Object.assign({nu:[]},c)));
+const food=id=>allFoods().find(f=>f.id===id)||{id,name:id,cat:'משלנו',al:[],nu:[],warn:''};
+const iso=d=>{const x=d||new Date();return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};
+const fmt=s=>{const[y,m,d]=s.split('-');return d+'/'+m+'/'+y};
+const logsOf=id=>S.logs[id]||[];
+const tried=id=>logsOf(id).length>0;
+const lastLog=id=>{const l=logsOf(id);return l[l.length-1]};
+const triedCount=()=>allFoods().filter(f=>tried(f.id)).length;
+const daysSince=s=>Math.floor((new Date(iso())-new Date(s))/864e5);
+const algNames=a=>a.map(c=>ALG[c]).join(', ');
+let tab='foods',filter='all',query='',selDay=new Date().getDay();
+
+function sheet(build){
+  const bg=h('div',{class:'sheet-bg',onclick:e=>{if(e.target===bg)bg.remove()}});
+  const sh=h('div',{class:'sheet',role:'dialog','aria-modal':'true'});
+  bg.append(sh);document.body.append(bg);build(sh,()=>bg.remove());return bg}
+
+function header(){
+  const n=triedCount();
+  $('#hcount').textContent=n+'/100';
+  $('#hbar').style.width=Math.min(100,n)+'%';
+  const ai=Object.keys(ALG).filter(c=>S.alg[c]).length;$('#acount').textContent=ai+'/9';$('#abar').style.width=Math.round(ai/9*100)+'%';
+  const av=$('#avatar');av.innerHTML='';const src=S.avatar||AVATAR;
+  if(src)av.append(h('img',{src,alt:'תומר'}));else av.textContent='ת';
+}
+function pickImage(size,cb){
+  const fi=h('input',{type:'file',accept:'image/*',hidden:true,onchange:e=>{
+    const f=e.target.files[0];fi.remove();if(!f)return;const u=URL.createObjectURL(f),im=new Image();
+    im.onload=()=>{const c=document.createElement('canvas');c.width=c.height=size;const x=c.getContext('2d'),m=Math.min(im.width,im.height);
+      x.drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,size,size);URL.revokeObjectURL(u);cb(c.toDataURL('image/jpeg',.78))};
+    im.onerror=()=>URL.revokeObjectURL(u);im.src=u}});
+  document.body.append(fi);fi.click()}
+const photoOf=id=>(S.photos&&S.photos[id])||'';
+function thumb(f,big){const p=photoOf(f.id);return h('span',{class:'thumb'+(big?' big':'')},p?h('img',{src:p,alt:''}):(f.em||f.name.charAt(0)))}
+function rating(f){const n=f.nu.length>=3?3:f.nu.length===2?2:1;return h('span',{class:'rate','aria-label':'ערך תזונתי '+n+' מתוך 3'},[1,2,3].map(i=>h('i',{class:i<=n?'on':''})))}
+const nuText=f=>f.nu.length?'עשיר ב'+f.nu.map(c=>NUTN[c]).join(', '):''
+/* ---------- foods ---------- */
+function statusDot(f){const l=lastLog(f.id);return h('span',{class:'dot '+(l?l.r:'')})}
+function foodRow(f){
+  const l=lastLog(f.id),k=logsOf(f.id).length;
+  const sub=[nuText(f),f.al.length?'מכיל '+algNames(f.al):''].filter(Boolean).join(' · ');
+  return h('button',{class:'food',onclick:()=>openLog(f.id)},thumb(f),
+    h('span',{class:'grow'},h('span',{class:'name'},f.name),sub?h('span',{class:'sub'},sub):null),
+    h('span',{style:'display:flex;flex-direction:column;align-items:flex-end;gap:4px'},rating(f),
+      l?h('span',{class:'tag '+(l.r==='love'?'g':l.r==='no'?'b':'w')},REACT[l.r]+(k>1?' ×'+k:'')):h('span',{class:'hint',style:'font-size:.72rem'},'חדש')));
+}
+function matches(f){
+  if(query&&!f.name.includes(query))return false;
+  const l=lastLog(f.id);
+  if(filter==='tried')return !!l;
+  if(filter==='not')return !l;
+  if(filter==='love')return l&&l.r==='love';
+  if(filter==='no')return l&&l.r==='no';
+  if(filter==='al')return f.al.length>0;
+  return true}
+function updateList(){
+  const box=$('#flist');box.innerHTML='';
+  const cats=CATS.concat(S.custom.length?['משלנו']:[]);
+  let any=false;
+  cats.forEach(c=>{
+    const fs=allFoods().filter(f=>f.cat===c&&matches(f));if(!fs.length)return;any=true;
+    const all=allFoods().filter(f=>f.cat===c);
+    box.append(h('div',{class:'catbar'},h('h2',null,c),h('span',{class:'n'},all.filter(f=>tried(f.id)).length+'/'+all.length)),
+      h('div',{class:'stack'},fs.map(foodRow)))});
+  if(!any)box.append(h('p',{class:'muted'},'לא נמצאו מאכלים. אפשר להוסיף מאכל משלכם.'));
+}
+function algExposure(c){let n=0;allFoods().forEach(f=>{if(f.al.includes(c))n+=logsOf(f.id).length});return n}
+function viewFoods(v){
+  v.append(h('div',{class:'row',style:'margin:8px 0 18px;flex-wrap:wrap'},h('button',{class:'btn',onclick:mealSheet},'+ רישום ארוחה'),h('button',{class:'btn soft',onclick:addFood},'+ הוסף מאכל')));
+  const ck=checkin();if(ck)v.append(ck);
+  const q=h('input',{type:'search',id:'q',placeholder:'חיפוש מאכל',value:query,oninput:e=>{query=e.target.value.trim();updateList()}});
+  v.append(q);
+  v.append(h('div',{id:'flist',style:'margin-top:6px'}));
+  updateList();
+}
+function addFood(){sheet((sh,close)=>{
+  const nm=h('input',{type:'text',id:'nf-name',placeholder:'שם המאכל'});const nuPick=new Set();const nb=h('div',{class:'chips'});Object.keys(NUTN).forEach(c=>nb.append(h('button',{class:'chip','aria-pressed':false,onclick:e=>{nuPick.has(c)?nuPick.delete(c):nuPick.add(c);e.currentTarget.setAttribute('aria-pressed',nuPick.has(c))}},NUTN[c])));
+  const sel=h('div',{class:'chips'});const pick=new Set();
+  Object.keys(ALG).forEach(c=>sel.append(h('button',{class:'chip','aria-pressed':false,onclick:e=>{pick.has(c)?pick.delete(c):pick.add(c);e.currentTarget.setAttribute('aria-pressed',pick.has(c))}},ALG[c])));
+  const wn=h('input',{type:'text',id:'nf-warn',placeholder:'הערת הגשה (לא חובה)'});
+  sh.append(h('h2',{style:'margin-top:0'},'מאכל חדש'),h('label',{for:'nf-name'},'שם'),nm,h('label',null,'מכיל אלרגן?'),sel,h('label',null,'עשיר ב'),nb,h('label',{for:'nf-warn'},'איך להגיש'),wn,
+    h('div',{class:'row',style:'margin-top:16px'},h('button',{class:'btn',onclick:()=>{
+      const n=nm.value.trim();if(!n||allFoods().some(f=>f.id===n)){nm.focus();return}
+      S.custom.push({id:n,name:n,cat:'משלנו',al:[...pick],nu:[...nuPick],warn:wn.value.trim()});save();close();render()}},'שמור'),
+      h('button',{class:'btn ghost',onclick:close},'ביטול')))})}
+function planDay(d){let p=S.plan[d];if(Array.isArray(p))p=S.plan[d]={b:[],l:p,d:[]};if(!p)p=S.plan[d]={b:[],l:[],d:[]};return p}
+const planIds=d=>{const p=planDay(d);return [...p.b,...p.l,...p.d]};
+/* ---------- log a food ---------- */
+function bumpAlg(f,date){f.al.forEach(c=>{const a=S.alg[c]||(S.alg[c]={first:date,last:date});if(date<a.first)a.first=date;if(date>a.last)a.last=date})}
+function openLog(id,dt0){sheet((sh,close)=>{
+  const f=food(id);let r='love',form=FORMS[0];
+  const ph=h('div',{class:'row'},thumb(f,true),h('div',{class:'grow'},h('h2',{style:'margin:0'},f.name),h('div',{class:'muted'},f.cat),h('div',{style:'margin-top:4px'},rating(f),' ',h('span',{class:'hint'},nuText(f)||'ערך תזונתי בסיסי'))));
+  sh.append(ph,h('div',{class:'row',style:'margin:8px 0 10px'},
+    h('button',{class:'btn soft small',onclick:()=>pickImage(240,d=>{S.photos=S.photos||{};S.photos[id]=d;save();close();render();openLog(id)})},photoOf(id)?'החלף תמונה':'הוסף תמונה'),
+    photoOf(id)?h('button',{class:'btn ghost small',onclick:()=>{delete S.photos[id];save();close();render();openLog(id)}},'הסר תמונה'):null));
+  if(f.warn)sh.append(h('div',{class:'notice'},'הגשה: '+f.warn,h('div',null,chokeBtn())));
+  const newAl=f.al.filter(c=>!S.alg[c]);
+  if(newAl.length)sh.append(h('div',{class:'notice bad',style:'margin-top:8px'},'אלרגן שעוד לא ניתן: '+algNames(newAl)+'. מומלץ להכניס אלרגן אחד בכל פעם ולהמתין כמה ימים לפני הבא.'));
+  const rb=h('div',{class:'chips'});
+  const drawR=()=>{rb.innerHTML='';Object.keys(REACT).forEach(k=>rb.append(h('button',{class:'chip','aria-pressed':r===k,onclick:()=>{r=k;drawR()}},REACT[k])))};drawR();
+  const fb=h('div',{class:'chips'});
+  const drawF=()=>{fb.innerHTML='';FORMS.forEach(k=>fb.append(h('button',{class:'chip','aria-pressed':form===k,onclick:()=>{form=k;drawF()}},k)))};drawF();
+  const dt=h('input',{type:'date',id:'lg-date',value:dt0||iso()});
+  const nt=h('textarea',{id:'lg-note',placeholder:'הערות (לא חובה)'});
+  sh.append(h('label',null,'איך הוא הגיב?'),rb,h('label',null,'באיזו צורה הוגש?'),fb,h('label',{for:'lg-date'},'תאריך'),dt,h('label',{for:'lg-note'},'הערה'),nt,
+    h('div',{class:'row',style:'margin-top:16px'},h('button',{class:'btn',onclick:()=>{
+      const d=dt.value||iso();(S.logs[id]=S.logs[id]||[]).push({d,r,f:form,n:nt.value.trim()});S.logs[id].sort((a,b)=>a.d<b.d?-1:1);
+      bumpAlg(f,d);save();close();render()}},'שמור ניסיון'),h('button',{class:'btn ghost',onclick:close},'ביטול')));
+  const hist=logsOf(id);
+  if(hist.length){sh.append(h('h3',{style:'margin-top:22px'},'היסטוריה'));
+    const ul=h('ul',{class:'plain stack'});
+    hist.slice().reverse().forEach(e=>{const i=hist.indexOf(e);ul.append(h('li',{class:'card row'},h('span',{class:'dot '+e.r}),
+      h('span',{class:'grow'},fmt(e.d)+' · '+REACT[e.r]+' · '+e.f,e.n?h('span',{class:'hint',style:'display:block'},e.n):null),
+      h('button',{class:'x','aria-label':'מחק ניסיון',onclick:()=>{S.logs[id].splice(i,1);if(!S.logs[id].length)delete S.logs[id];save();close();render()}},'×')))});
+    sh.append(ul)}
+  if(S.custom.some(c=>c.id===id))sh.append(h('button',{class:'btn danger small',style:'margin-top:14px',onclick:()=>{S.custom=S.custom.filter(c=>c.id!==id);delete S.logs[id];save();close();render()}},'מחק מאכל מהרשימה'));
+})}
+
+/* ---------- week ---------- */
+function pickFoods(day,meal,after){sheet((sh,close)=>{
+  const q=h('input',{type:'search',id:'pk-q',placeholder:'חיפוש מאכל'});const box=h('div',{class:'stack',style:'margin-top:10px'});
+  const draw=()=>{box.innerHTML='';const t=q.value.trim();
+    allFoods().filter(f=>!t||f.name.includes(t)).forEach(f=>{
+      const on=planDay(day)[meal].includes(f.id);
+      box.append(h('button',{class:'food',onclick:()=>{const p=planDay(day)[meal];const i=p.indexOf(f.id);i<0?p.push(f.id):p.splice(i,1);save();draw()}},
+        h('span',{class:'check','aria-checked':on},on?'✓':''),thumb(f),h('span',{class:'grow'},h('span',{class:'name'},f.name),f.al.length?h('span',{class:'sub'},'מכיל '+algNames(f.al)):null),
+        tried(f.id)?h('span',{class:'tag g'},'ניסה'):h('span',{class:'tag'},'חדש')))})};
+  q.addEventListener('input',draw);draw();
+  sh.append(h('h2',{style:'margin-top:0'},MEALS.find(m=>m[0]===meal)[1]+' · יום '+DAYF[day]),q,box,h('button',{class:'btn',style:'margin-top:14px',onclick:()=>{close();render()}},'סיום'))})}
+function viewWeek(v){
+  const days=h('div',{class:'days',style:'margin-top:8px'});
+  DAYN.forEach((n,i)=>days.append(h('button',{class:'day','aria-pressed':selDay===i,onclick:()=>{selDay=i;render()}},n,h('small',null,planIds(i).length||'·'))));
+  v.append(h('h2',null,'התפריט השבועי'));const ck=checkin();if(ck)v.append(ck);v.append(days);
+  const pd=planDay(selDay);
+  const card=h('div',{class:'card stack',style:'margin-top:10px'},h('h3',{style:'margin:0'},'יום '+DAYF[selDay]));
+  MEALS.forEach(([m,label])=>{
+    const items=pd[m];const sec=h('div',{class:'meal stack'},h('h4',null,label,h('button',{class:'btn soft small',onclick:()=>pickFoods(selDay,m)},'הוסף')));
+    if(!items.length)sec.append(h('p',{class:'hint',style:'margin:0'},'עוד לא נבחר.'));
+    items.forEach(id=>{const f=food(id);const newAl=f.al.filter(c=>!S.alg[c]);
+      sec.append(h('div',{class:'row'},h('button',{class:'grow food',onclick:()=>openLog(id)},thumb(f),h('span',{class:'grow name'},f.name),tried(id)?null:h('span',{class:'tag'},'חדש'),newAl.length?h('span',{class:'tag b'},'אלרגן חדש'):null),
+        h('button',{class:'x','aria-label':'הסר',onclick:()=>{pd[m]=items.filter(x=>x!==id);save();render()}},'×')))});
+    card.append(sec)});
+  const newA=new Set();planIds(selDay).forEach(id=>food(id).al.forEach(c=>{if(!S.alg[c])newA.add(c)}));
+  if(newA.size>1)card.append(h('div',{class:'notice'},'ביום הזה יש יותר מאלרגן חדש אחד ('+algNames([...newA])+'). מומלץ להכניס אלרגן אחד בכל פעם.'));
+  v.append(card);
+  const need={};DAYN.forEach((_,i)=>planIds(i).forEach(id=>need[id]=1));
+  const ids=Object.keys(need);
+  v.append(h('h2',null,'רשימת קניות'));
+  if(!ids.length)v.append(h('p',{class:'muted'},'הרשימה תיבנה לבד מהמאכלים שבחרתם לשבוע.'));
+  else{const c=h('div',{class:'card stack'});
+    CATS.concat(['משלנו']).forEach(cat=>{const g=ids.filter(id=>food(id).cat===cat);if(!g.length)return;
+      c.append(h('div',{class:'hint'},cat));
+      g.forEach(id=>{const on=!!S.shop[id];c.append(h('button',{class:'row',style:'text-align:start',onclick:()=>{on?delete S.shop[id]:S.shop[id]=1;save();render()}},h('span',{class:'check','aria-checked':on},on?'✓':''),h('span',{style:on?'text-decoration:line-through;opacity:.6':''},id)))})});
+    v.append(c)}
+  v.append(h('button',{class:'btn ghost small',style:'margin-top:14px',onclick:()=>{S.plan={};S.shop={};save();render()}},'נקה את השבוע'));
+}
+
+/* ---------- recipes ---------- */
+function recInfo(r){
+  const ings=r.ing.map(food);const knownI=ings.filter(f=>tried(f.id)),newI=ings.filter(f=>!tried(f.id));
+  const al=[...new Set(ings.flatMap(f=>f.al))];const blocked=al.filter(c=>!S.alg[c]);
+  return{ings,knownI,newI,al,blocked}}
+function viewRecipes(v){
+  const all=REC.map(([name,ing,steps])=>({name,ing,steps})).concat(S.recipes.map((r,i)=>({...r,mine:i})));
+  const info=all.map(r=>({r,i:recInfo(r)}));
+  const rank=x=>x.i.blocked.length?3:x.i.newI.length===0?0:x.i.newI.length<=1?1:2;
+  info.sort((a,b)=>rank(a)-rank(b)||a.i.newI.length-b.i.newI.length);
+  v.append(h('div',{style:'margin:8px 0 6px'},h('button',{class:'btn',onclick:addRecipe},'+ הוסף מתכון')),h('h2',null,'מתכוני בייבילד'),h('p',{class:'muted',style:'margin-top:0'},'ממוינים לפי מה שתומר כבר אכל. מתכון עם אלרגן שעוד לא ניתן יורד לסוף הרשימה.'));
+  const box=h('div',{class:'stack'});
+  info.forEach(({r,i})=>{
+    const status=i.blocked.length?h('span',{class:'tag b'},'מחכה ל'+algNames(i.blocked)):i.newI.length===0?h('span',{class:'tag g'},'הכל מוכר'):h('span',{class:'tag'},i.newI.length+' מאכלים חדשים');
+    box.append(h('button',{class:'card',style:'text-align:start',onclick:()=>openRecipe(r,i)},
+      h('div',{class:'row'},h('b',{class:'grow'},r.name),status),
+      h('div',{class:'hint',style:'margin-top:4px'},r.ing.join(' · '))))});
+  v.append(box);
+}
+function openRecipe(r,i){sheet((sh,close)=>{
+  let day=selDay;const dr=h('div',{class:'chips'});const drawD=()=>{dr.innerHTML='';DAYF.forEach((n,k)=>dr.append(h('button',{class:'chip','aria-pressed':day===k,onclick:()=>{day=k;drawD()}},n)))};drawD();
+  sh.append(h('h2',{style:'margin-top:0'},r.name));
+  if(i.blocked.length)sh.append(h('div',{class:'notice bad'},'המתכון כולל אלרגן שעוד לא ניתן: '+algNames(i.blocked)+'. כדאי להכניס אותו קודם בנפרד.'));
+  const ul=h('ul',{class:'plain stack',style:'margin-top:10px'});
+  i.ings.forEach(f=>ul.append(h('li',{class:'row'},statusDot(f),h('span',{class:'grow'},f.name),tried(f.id)?h('span',{class:'tag g'},'ניסה'):h('span',{class:'tag'},'חדש'),f.al.length?h('span',{class:'tag b'},algNames(f.al)):null)));
+  sh.append(ul);
+  if(r.url&&r.url.startsWith('https://'))sh.append(h('p',{style:'margin:10px 0 0'},h('a',{href:r.url,target:'_blank',rel:'noopener',style:'color:var(--accent);font-weight:600'},'למתכון המקורי')));
+  const warns=i.ings.filter(f=>f.warn);
+  if(warns.length)sh.append(h('div',{class:'notice',style:'margin-top:10px'},warns.map(f=>h('div',null,f.name+': '+f.warn)),chokeBtn()));
+  sh.append(h('h3',{style:'margin-top:16px'},'הכנה'),h('p',{style:'margin:0;white-space:pre-wrap'},r.steps||''),
+    h('label',null,'הוסף לתפריט, לאיזה יום?'),dr,h('label',null,'ולאיזו ארוחה?'),h('div',{class:'chips'},MEALS.map(([m,l])=>h('button',{class:'chip',onclick:()=>{const p=planDay(day);p[m]=[...new Set(p[m].concat(r.ing))];selDay=day;save();close();tab='week';render();window.scrollTo(0,0)}},l))),
+    h('div',{class:'row',style:'margin-top:16px'},r.mine!=null?h('button',{class:'btn danger small',onclick:()=>{S.recipes.splice(r.mine,1);save();close();render()}},'מחק'):null,
+      h('button',{class:'btn ghost',onclick:close},'סגור')))})}
+const SID=((crypto.randomUUID&&crypto.randomUUID())||(String(Math.random()).slice(2)+Date.now())).replace(/-/g,'');
+async function fetchRecipeText(link){
+  const mcp=await claude.use('mcp');
+  if(!mcp)throw {code:'no_mcp'};
+  const r=await mcp.callTool('Parallel Search','web_fetch',{urls:[link],objective:'Recipe title, full ingredients list and method steps',session_id:SID});
+  let p=r&&r.payload;if(typeof p==='string'){try{p=JSON.parse(p)}catch(e){}}
+  const it=p&&p.results&&p.results[0];
+  const txt=it?(String(it.full_content||'')+'\n'+(Array.isArray(it.excerpts)?it.excerpts.join('\n\n'):'')).trim():'';
+  if(!txt)throw {code:'empty'};
+  return txt}
+function linkErr(e){const c=e&&e.code;
+  if(c==='no_mcp'||c==='capability_disabled'||c==='not_granted'||c==='capability_removed')return 'קריאת קישורים לא זמינה כאן. אפשר להדביק את הטקסט של המתכון.';
+  if(c==='not_in_manifest'||c==='approval_required')return 'צריך לאשר לאפליקציה להשתמש בחיבור Parallel Search. לחצו שוב ואשרו.';
+  if(c==='server_not_connected'||c==='selection_required'||c==='needs_reauth')return 'החיבור Parallel Search לא מחובר בחשבון. מחברים אותו בהגדרות החיבורים ב-claude.ai.';
+  if(c==='empty')return 'לא הצלחתי לקרוא מתכון מהעמוד הזה. אפשר להדביק את הטקסט.';
+  return 'הקריאה נכשלה. אפשר לנסות שוב או להדביק את הטקסט.'}
+function addRecipe(){sheet(async(sh,close)=>{
+  const nm=h('input',{type:'text',id:'rc-name',placeholder:'שם המתכון'});const st=h('textarea',{id:'rc-steps',placeholder:'הכנה'});
+  const url=h('input',{type:'text',id:'rc-url',placeholder:'https://...',dir:'ltr'});
+  const pick=new Set();const q=h('input',{type:'search',id:'rc-q',placeholder:'חפשו מרכיב'});const box=h('div',{class:'chips',style:'margin-top:8px'});
+  const draw=()=>{box.innerHTML='';const t=q.value.trim();allFoods().filter(f=>pick.has(f.id)||(t&&f.name.includes(t))).slice(0,30).forEach(f=>box.append(h('button',{class:'chip','aria-pressed':pick.has(f.id),onclick:()=>{pick.has(f.id)?pick.delete(f.id):pick.add(f.id);draw()}},f.name)))};
+  q.addEventListener('input',draw);
+  const note=h('div',{class:'hint',style:'margin-top:6px'});
+  const paste=h('textarea',{id:'rc-paste',placeholder:'הדביקו כאן את המרכיבים וההכנה מהאתר'});
+  const auto=h('button',{class:'btn soft small',style:'margin-top:8px',onclick:async()=>{
+    let t=paste.value.trim();const link=url.value.trim();
+    if(!t&&link){
+      if(!link.startsWith('https://')){note.textContent='הקישור צריך להתחיל ב-https://';return}
+      auto.disabled=true;note.textContent='קורא את הקישור...';
+      try{t=await fetchRecipeText(link)}catch(e){note.textContent=linkErr(e);auto.disabled=false;return}
+    }
+    if(!t){note.textContent='הדביקו קישור למתכון או את הטקסט שלו.';return}
+    auto.disabled=true;
+    const list=allFoods().map(f=>f.id);
+    const apply=(name,ings,steps)=>{if(name)nm.value=String(name);ings.forEach(x=>{if(list.includes(x))pick.add(x)});if(steps)st.value=String(steps);draw()};
+    const basic=why=>{const lines=t.split('\n').map(s=>s.trim()).filter(Boolean);
+      const found=allFoods().filter(f=>t.includes(f.name.replace(/\s*\(.*\)/,''))).map(f=>f.id);
+      apply((lines[0]||'').replace(/^#+\s*/,'').slice(0,80),found,t.slice(0,4000));
+      note.textContent=why+' מילאתי בזיהוי בסיסי: כדאי לבדוק את השם, המרכיבים וההכנה.'};
+    let sample=null;try{sample=await claude.use('sample')}catch(e){}
+    if(!sample){basic('ההתאמה החכמה לא זמינה כאן.');auto.disabled=false;return}
+    note.textContent='מתאים את המתכון, זה יכול לקחת עד דקה...';
+    try{
+      const o=await sample.json('המר את המתכון הבא למתכון בייבילד לתינוק בן חצי שנה. החזר JSON בלבד בצורה {"name":string,"ingredients":string[],"steps":string,"skipped":string[]}. name: שם המתכון בעברית. ingredients: רק שמות מהרשימה, בדיוק כפי שהם כתובים, שהמתכון משתמש בהם. skipped: מרכיבים שאין להם מקבילה ברשימה. steps: הוראות הכנה קצרות בעברית, בלי מלח, סוכר ודבש, עם הערה אם צריך לשנות צורת הגשה לבייבילד. רשימה: '+list.join(' | ')+'\n\nמתכון:\n'+t.slice(0,6000),{modelTier:'default'});
+      if(!o||typeof o!=='object')throw {code:'invalid_json'};
+      const ing=(Array.isArray(o.ingredients)?o.ingredients:[]).map(x=>String(x).trim());
+      apply(o.name,ing,o.steps);
+      const missed=ing.filter(x=>!list.includes(x));
+      const sk=(Array.isArray(o.skipped)?o.skipped:[]).concat(missed).filter(Boolean);
+      note.textContent=sk.length?'המתכון הותאם. מרכיבים שלא ברשימה ולא נוספו: '+sk.join(', ')+'. אפשר להוסיף אותם כמאכל משלכם.':'המתכון הותאם. כדאי לעבור עליו לפני שמירה.';
+    }catch(e){
+      const c=e&&e.code;
+      const why=c==='not_granted'?'צריך לאשר לאפליקציה להשתמש ב-Claude, ואז ללחוץ שוב.':c==='rate_limited'?'יותר מדי בקשות, נסו שוב עוד רגע.':c==='invalid_json'?'לא הצלחתי להבין את התשובה.':'ההתאמה נכשלה'+(c?' ('+c+')':'')+'.';
+      if(c==='not_granted'){note.textContent=why}else basic(why);
+    }
+    auto.disabled=false}},'התאם לפורמט אוטומטית');
+  sh.append(h('h2',{style:'margin-top:0'},'מתכון חדש'),
+    h('label',{for:'rc-url'},'קישור למתכון באינטרנט'),url,
+    h('label',{for:'rc-paste'},'או הדביקו את הטקסט של המתכון'),paste,auto,note,
+    h('label',{for:'rc-name'},'שם'),nm,h('label',{for:'rc-q'},'מרכיבים מהרשימה'),q,box,h('label',{for:'rc-steps'},'הכנה'),st,
+    h('p',{class:'hint'},'עם קישור, "התאם לפורמט" קורא את העמוד וממלא שם, מרכיבים והכנה. כדאי לעבור על התוצאה לפני שמירה.'),
+    h('div',{class:'row',style:'margin-top:12px'},h('button',{class:'btn',onclick:()=>{if(!nm.value.trim()||!pick.size){nm.focus();return}
+      const u=url.value.trim();S.recipes.push({name:nm.value.trim(),ing:[...pick],steps:st.value.trim(),url:u.startsWith('https://')?u:''});save();close();render()}},'שמור'),h('button',{class:'btn ghost',onclick:close},'ביטול')))})}
+/* ---------- allergens ---------- */
+function reactSheet(c){sheet((sh,close)=>{
+  let r=RR[0];const rb=h('div',{class:'chips'});
+  const draw=()=>{rb.innerHTML='';RR.forEach(k=>rb.append(h('button',{class:'chip','aria-pressed':r===k,onclick:()=>{r=k;draw()}},k)))};draw();
+  const dt=h('input',{type:'date',id:'ar-date',value:iso()});const nt=h('textarea',{id:'ar-note',placeholder:'מה קרה ומתי (לא חובה)'});
+  sh.append(h('h2',{style:'margin-top:0'},'תגובה ל'+ALG[c]),h('div',{class:'notice bad'},'נפיחות בפנים, קשיי נשימה, הקאות חוזרות או חוסר תגובה הם מצב חירום. מתקשרים מיד למד"א 101.'),
+    h('label',null,'מה קרה?'),rb,h('label',{for:'ar-date'},'תאריך'),dt,h('label',{for:'ar-note'},'הערה'),nt,
+    h('div',{class:'row',style:'margin-top:16px'},h('button',{class:'btn',onclick:()=>{S.react.push({c,d:dt.value||iso(),r,n:nt.value.trim()});save();close();render()}},'שמור'),h('button',{class:'btn ghost',onclick:close},'ביטול')))})}
+function viewAllergens(v){
+  v.append(h('h2',null,'אלרגנים'),h('p',{class:'muted',style:'margin-top:0'},'מסמנים אוטומטית כשרושמים מאכל שמכיל אלרגן. אחרי שהוכנס, כדאי להמשיך להגיש אותו באופן קבוע.'));
+  const box=h('div',{class:'stack'});
+  Object.keys(ALG).forEach(c=>{
+    const a=S.alg[c],rs=S.react.filter(x=>x.c===c);const gap=a?daysSince(a.last):0;
+    const bad=rs.some(x=>x.r!==RR[0]);
+    const card=h('div',{class:'card stack'},
+      h('div',{class:'row'},h('button',{class:'check','aria-checked':!!a,'aria-label':'סמן '+ALG[c],onclick:()=>{if(a)delete S.alg[c];else S.alg[c]={first:iso(),last:iso()};save();render()}},a?'✓':''),
+        h('b',{class:'grow'},ALG[c]),bad?h('span',{class:'tag b'},'הייתה תגובה'):null,a?h('span',{class:'tag g'},'ניתן'):h('span',{class:'tag'},'עוד לא')),
+      a?h('div',{class:'hint'},'ניתן לראשונה: '+fmt(a.first)+' · לאחרונה: '+fmt(a.last)):null,
+      (()=>{const fl=allFoods().filter(f=>f.al.includes(c)&&tried(f.id));
+        const ex=allFoods().filter(f=>f.al.includes(c)&&!tried(f.id)&&f.al.length===1).slice(0,4);
+        return h('div',{class:'stack',style:'gap:6px'},
+          fl.length?h('div',{class:'hint'},'מאכלים שניתנו ומכילים '+ALG[c]+':'):(a?h('div',{class:'hint'},'סומן ידנית, עוד לא נרשם מאכל שמכיל '+ALG[c]+'.'):null),
+          fl.length?h('div',{class:'chips'},fl.map(f=>{const l=lastLog(f.id);return h('button',{class:'chip',onclick:()=>openLog(f.id)},f.name+' · '+REACT[l.r]+(logsOf(f.id).length>1?' ×'+logsOf(f.id).length:''))})):null,
+          ex.length?h('div',{class:'hint'},(fl.length?'עוד אפשרויות: ':'אפשר להתחיל עם: ')+ex.map(f=>f.name).join(', ')):null)})(),
+      a&&gap>=10?h('div',{class:'notice'},'לא ניתן כבר '+gap+' ימים. כדאי להגיש שוב כדי לשמור על החשיפה.'):null,
+      rs.length?h('ul',{class:'plain stack'},rs.map(x=>{const i=S.react.indexOf(x);return h('li',{class:'row hint'},h('span',{class:'grow'},fmt(x.d)+' · '+x.r+(x.n?' · '+x.n:'')),h('button',{class:'x','aria-label':'מחק',onclick:()=>{S.react.splice(i,1);save();render()}},'×'))})):null,
+      h('div',{class:'row',style:'flex-wrap:wrap'},
+        h('button',{class:'btn soft small',onclick:()=>{const t=iso();S.alg[c]=S.alg[c]?{first:S.alg[c].first,last:t}:{first:t,last:t};save();render()}},'ניתן היום'),
+        h('button',{class:'btn ghost small',onclick:()=>reactSheet(c)},'רישום תגובה')));
+    box.append(card)});
+  v.append(box);
+}
+
+/* ---------- journal + backup ---------- */
+function viewJournal(v){
+  v.append(h('h2',null,'יומן ניסיונות'));
+  const rows=[];Object.keys(S.logs).forEach(id=>S.logs[id].forEach(e=>rows.push({id,...e})));
+  rows.sort((a,b)=>a.d<b.d?1:-1);
+  if(!rows.length)v.append(h('p',{class:'muted'},'כאן יופיעו כל הניסיונות לפי תאריך.'));
+  else{const ul=h('ul',{class:'plain stack'});rows.slice(0,60).forEach(e=>ul.append(h('li',{class:'card row'},h('span',{class:'dot '+e.r}),h('span',{class:'grow'},h('b',null,e.id),h('span',{class:'hint',style:'display:block'},fmt(e.d)+' · '+REACT[e.r]+' · '+e.f+(e.n?' · '+e.n:''))))));v.append(ul)}
+  v.append(h('h2',null,'גיבוי ושחזור'),h('p',{class:'muted',style:'margin-top:0'},'הנתונים נשמרים בדפדפן של הטלפון הזה. אם מנקים את הדפדפן הם נמחקים, ולכן כדאי לשמור גיבוי. כדי להעביר לטלפון השני: גיבוי כאן, ושחזור שם.'));
+  const out=h('div',{id:'bk-out'});
+  const fi=h('input',{type:'file',id:'bk-file',accept:'.json,application/json',hidden:true,onchange:e=>{
+    const f=e.target.files[0];if(!f)return;const rd=new FileReader();
+    rd.onload=()=>{try{const d=JSON.parse(rd.result);if(!d||typeof d!=='object'||!d.logs)throw 0;S=Object.assign({custom:[],logs:{},alg:{},react:[],plan:{},shop:{},recipes:[],photos:{},avatar:'',skips:{}},d);save();render();out.textContent='השחזור הצליח.'}catch(x){out.textContent='הקובץ לא נראה כמו גיבוי של תומר אוכל.'}};rd.readAsText(f)}});
+  v.append(h('div',{class:'row',style:'flex-wrap:wrap'},
+    h('button',{class:'btn',onclick:async()=>{
+      const data=JSON.stringify(S);let ok=false;
+      try{const dl=await claude.use('downloads');if(dl){await dl.save({filename:'tomer-eats-backup-'+iso()+'.json',data});out.textContent='הגיבוי נשמר.';ok=true}}catch(e){if(e&&e.code==='declined')return}
+      if(!ok){const ta=h('textarea',{id:'bk-text',readonly:true});ta.value=data;out.innerHTML='';out.append(h('p',{class:'hint'},'לא ניתן לשמור קובץ כאן. מעתיקים את הטקסט ושומרים אותו במקום בטוח.'),ta,h('button',{class:'btn soft small',style:'margin-top:8px',onclick:()=>{ta.select();try{navigator.clipboard.writeText(data)}catch(e){}}},'העתק'))}}},'גבה לקובץ'),
+    h('button',{class:'btn soft',onclick:()=>fi.click()},'שחזר מקובץ'),fi),out);
+  if(saveFail)v.append(h('div',{class:'notice bad',style:'margin-top:10px'},'השמירה בדפדפן לא זמינה כרגע. מומלץ לגבות לקובץ.'));
+}
+
+/* ---------- recommendations ---------- */
+const ORDER=['m','w','e','p','s','t','o','f','x'];
+function nutGaps(){
+  const out=[];Object.keys(NUTN).forEach(c=>{let last=null;allFoods().forEach(f=>{if(f.nu.includes(c)&&tried(f.id)){const d=lastLog(f.id).d;if(!last||d>last)last=d}});
+    const gap=last?daysSince(last):null;if(gap===null||gap>=7)out.push({c,gap})});return out}
+function foodItem(f,why){return h('button',{class:'food',onclick:()=>openLog(f.id)},thumb(f),h('span',{class:'grow'},h('span',{class:'name'},f.name),h('span',{class:'sub'},why)),rating(f))}
+function viewRecs(v){
+  const n=triedCount();
+  const wk=new Set();Object.keys(S.logs).forEach(id=>S.logs[id].forEach(e=>{if(daysSince(e.d)<7)wk.add(id)}));
+  v.append(h('h2',null,'המלצות'),h('button',{class:'btn danger',style:'width:100%;margin-bottom:10px',onclick:chokeSheet},'עזרה ראשונה: חנק בתינוק'),h('div',{class:'card'},h('b',null,'7 הימים האחרונים'),h('div',{class:'muted'},wk.size?'תומר אכל '+wk.size+' מאכלים שונים.':'עוד לא נרשמו מאכלים השבוע.')));
+  // gaps
+  v.append(h('h2',null,'לא שילבנו הרבה זמן'));
+  const gaps=nutGaps();const gbox=h('div',{class:'stack'});
+  if(!n)gbox.append(h('p',{class:'muted',style:'margin:0'},'אחרי שתרשמו כמה מאכלים, כאן יופיעו תזכורות על רכיבים שלא הוגשו זמן רב.'));
+  else if(!gaps.length)gbox.append(h('div',{class:'notice ok'},'כל הרכיבים החשובים הוגשו בשבוע האחרון.'));
+  gaps.forEach(g=>{const ex=allFoods().filter(f=>f.nu.includes(g.c)&&!f.al.some(a=>!S.alg[a])).slice(0,4).map(f=>f.name).join(', ');
+    gbox.append(h('div',{class:'notice'},h('b',null,NUTN[g.c]),g.gap===null?' עוד לא הוגש.':' לא הוגש '+g.gap+' ימים.',h('div',{class:'hint'},'למשל: '+ex)))});
+  Object.keys(ALG).forEach(c=>{const a=S.alg[c];if(a&&daysSince(a.last)>=10)gbox.append(h('div',{class:'notice'},h('b',null,ALG[c]),' לא ניתן '+daysSince(a.last)+' ימים. כדאי להגיש שוב כדי לשמור על החשיפה.'))});
+  v.append(gbox);
+  // next week
+  v.append(h('h2',null,'כדאי לנסות בשבוע הבא'));
+  const gapSet=new Set(gaps.map(g=>g.c));const catTried={};CATS.forEach(c=>{const l=allFoods().filter(f=>f.cat===c);catTried[c]=l.filter(f=>tried(f.id)).length/l.length});
+  const cand=allFoods().filter(f=>!tried(f.id)&&!f.al.some(a=>!S.alg[a])).map(f=>({f,why:f.nu.filter(c=>gapSet.has(c)),sc:f.nu.filter(c=>gapSet.has(c)).length*2+(1-(catTried[f.cat]||0))+f.nu.length*.3}));
+  cand.sort((a,b)=>b.sc-a.sc);const pick=[],cc={};
+  cand.forEach(x=>{if(pick.length<7&&(cc[x.f.cat]||0)<2){pick.push(x);cc[x.f.cat]=(cc[x.f.cat]||0)+1}});
+  const sbox=h('div',{class:'stack'});
+  pick.forEach(x=>sbox.append(foodItem(x.f,x.why.length?'משלים '+x.why.map(c=>NUTN[c]).join(', '):'מוסיף גיוון ל'+x.f.cat)));
+  v.append(sbox);
+  const nextA=ORDER.find(c=>!S.alg[c]);
+  if(nextA){const recent=Math.min(...Object.values(S.alg).map(a=>daysSince(a.first)).concat([99]));
+    const ex=allFoods().find(f=>!tried(f.id)&&f.al.length===1&&f.al[0]===nextA);
+    v.append(h('div',{class:'card',style:'margin-top:10px'},h('b',null,'האלרגן הבא בתור: '+ALG[nextA]),
+      h('div',{class:'muted'},recent<3?'הוכנס אלרגן לפני '+recent+' ימים. כדאי להמתין כמה ימים ולוודא שאין תגובה לפני הבא.':'עברו כמה ימים מההכנסה האחרונה, אפשר להתקדם.'+(ex?' למשל: '+ex.name+'.':'')),
+      h('div',{class:'hint',style:'margin-top:4px'},'הסדר הוא הצעה כללית. כדאי לאשר את הסדר והתזמון עם רופאת הילדים.')))}
+  // retry
+  const retry=allFoods().filter(f=>{const l=lastLog(f.id);return l&&l.r==='no'&&logsOf(f.id).length<8}).slice(0,6);
+  if(retry.length){v.append(h('h2',null,'כדאי לנסות שוב'),h('p',{class:'hint',style:'margin-top:0'},'לפעמים צריך 8 עד 10 חשיפות עד שמתרגלים לטעם. אפשר לשנות צורת הגשה.'),
+    h('div',{class:'stack'},retry.map(f=>foodItem(f,'ניסה '+logsOf(f.id).length+' פעמים'))))}
+  // not recommended
+  v.append(h('h2',null,'לא מומלץ בגיל הזה'),
+    h('div',{class:'notice bad'},h('div',null,'דבש: אסור עד גיל שנה'),h('div',null,'חלב פרה כמשקה עיקרי'),h('div',null,'מלח וסוכר מוסף'),h('div',null,'אגוזים, בוטנים וגרעינים שלמים'),h('div',null,'פופקורן, ענבים שלמים, ירקות ופירות קשים נאים, נקניקיות עגולות שלמות')),
+    h('p',{class:'hint'},'האפליקציה היא כלי מעקב ולא תחליף להנחיות רופאת הילדים או משרד הבריאות. אם יש ספק, שואלים.'));
+}
+
+/* ---------- daily menu check-in ---------- */
+function checkin(){
+  const dow=new Date().getDay();
+  const days=[[iso(new Date(Date.now()-864e5)),(dow+6)%7,'אתמול'],[iso(),dow,'היום']];
+  S.skips=S.skips||{};const items=[];
+  days.forEach(([date,d,lab])=>planIds(d).forEach(id=>{if(!logsOf(id).some(e=>e.d===date)&&!S.skips[date+'|'+id])items.push({date,id,lab})}));
+  if(!items.length)return null;
+  const card=h('div',{class:'card stack',style:'margin:8px 0;background:var(--butter);border-color:var(--warn)'},
+    h('b',null,'בדיקת התפריט: מה נאכל?'),h('span',{class:'hint',style:'color:var(--fg)'},'מאכלים מהתפריט שעוד לא נרשמו. אכל? נרשם ניסיון. לא אכל? מסירים מהרשימה.'));
+  items.slice(0,8).forEach(x=>{const f=food(x.id);
+    card.append(h('div',{class:'row',style:'flex-wrap:wrap'},thumb(f),h('span',{class:'grow'},h('b',null,f.name),h('span',{class:'hint',style:'display:block;color:var(--fg)'},x.lab)),
+      h('button',{class:'btn small',onclick:()=>openLog(x.id,x.date)},'אכל'),
+      h('button',{class:'btn ghost small',onclick:()=>{S.skips[x.date+'|'+x.id]=1;save();render()}},'לא אכל')))});
+  if(items.length>8)card.append(h('span',{class:'hint'},'ועוד '+(items.length-8)+' מאכלים.'));
+  return card}
+
+/* ---------- shell ---------- */
+const ICON={foods:'<circle cx="12" cy="12" r="9"/><path d="M8 13c1.2 1.6 2.6 2.4 4 2.4s2.8-.8 4-2.4"/><path d="M9 9.5h.01M15 9.5h.01"/>',
+ week:'<rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16"/>',
+ recipes:'<path d="M6 11h12a3 3 0 0 1 0 6H6a3 3 0 0 1 0-6z"/><path d="M8 11c0-3 1.5-5 4-5s4 2 4 5"/>',
+ allergens:'<path d="M12 3l8 3v6c0 4.5-3.2 7.5-8 9-4.8-1.5-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
+ recs:'<path d="M12 3l2.4 5 5.6.8-4 3.9 1 5.5-5-2.7-5 2.7 1-5.5-4-3.9 5.6-.8z"/>',
+ journal:'<path d="M6 4h11a2 2 0 0 1 2 2v14H8a2 2 0 0 1-2-2z"/><path d="M10 9h5M10 13h5"/>'};
+const TABS=[['foods','מאכלים'],['week','שבוע'],['recipes','מתכונים'],['recs','המלצות'],['allergens','אלרגנים'],['journal','יומן']];
+function render(){
+  const y=window.scrollY;header();
+  const v=$('#view');v.innerHTML='';
+  ({foods:viewFoods,week:viewWeek,recipes:viewRecipes,recs:viewRecs,allergens:viewAllergens,journal:viewJournal})[tab](v);
+  $('#tabs').innerHTML='';
+  TABS.forEach(([k,t])=>$('#tabs').append(h('button',{class:'tab',role:'tab','aria-selected':tab===k,onclick:()=>{tab=k;render();window.scrollTo(0,0)}},
+    (()=>{const s=document.createElementNS('http://www.w3.org/2000/svg','svg');s.setAttribute('viewBox','0 0 24 24');s.innerHTML=ICON[k];return s})(),t)));
+  window.scrollTo(0,y);
+}
+document.body.prepend(h('div',{class:'wrap'},
+  h('header',null,h('div',{class:'brand'},
+    h('div',{class:'row'},h('button',{class:'avatar',id:'avatar','aria-label':'שנה תמונה של תומר',onclick:()=>pickImage(200,d=>{S.avatar=d;save();render()})}),h('h1',null,'תומר ',h('span',null,'אוכל'))),
+    h('div',{class:'hmeters'},
+      h('div',{class:'hmeter'},h('div',{class:'count',id:'hcount'}),h('div',{class:'meter',role:'progressbar','aria-label':'מאכלים שנוסו מתוך 100'},h('i',{id:'hbar'})),h('div',{class:'mcap'},'מאכלים')),
+      h('button',{class:'hmeter',style:'text-align:start','aria-label':'אלרגנים שהוכנסו, פתח רישום אלרגנים',onclick:()=>{tab='allergens';render();window.scrollTo(0,0)}},h('div',{class:'count',id:'acount'}),h('div',{class:'meter',role:'progressbar','aria-label':'אלרגנים שהוכנסו מתוך 9'},h('i',{id:'abar'})),h('div',{class:'mcap'},'אלרגנים'))))),
+  h('main',{id:'view'})),
+  h('nav',{class:'tabs','aria-label':'ניווט'},h('div',{id:'tabs',role:'tablist'})));
+render();
+/* ---------- choking first aid ---------- */
+function chokeSheet(){sheet((sh,close)=>{
+  const ul=(a)=>h('ul',{style:'margin:4px 0;padding-inline-start:20px'},a.map(t=>h('li',{style:'margin:4px 0'},t)));
+  const ol=(a)=>h('ol',{style:'margin:4px 0;padding-inline-start:22px'},a.map(t=>h('li',{style:'margin:6px 0'},t)));
+  sh.append(h('h2',{style:'margin-top:0'},'עזרה ראשונה: חנק בתינוק'),
+    h('div',{class:'notice bad'},h('b',null,'תינוק שלא נושם, לא בוכה ולא משמיע קול: מתקשרים מיד למד"א 101.'),' אפשר להפעיל רמקול ולהמשיך לטפל בו.'),
+    h('h3',{style:'margin-top:14px'},'גאג או חנק?'),
+    ul(['גאג (רפלקס הקאה): רועש, שיעול, פנים אדומות, הלשון דוחפת החוצה. זה נורמלי בהתחלה. נותנים לו להתמודד, בלי להכניס אצבע לפה.','חנק: שקט או קול חנוק, לא מצליח לשעול, לבכות או לנשום, פנים כחולות או חיוורות. זה מצב חירום.']),
+    h('h3',{style:'margin-top:14px'},'אם הוא משתעל חזק'),
+    ul(['מעודדים להמשיך לשעול, ולא מכים בגב.']),
+    h('h3',{style:'margin-top:14px'},'אם לא מצליח לשעול או לנשום (מתחת לגיל שנה)'),
+    ol(['מתקשרים 101, או מבקשים ממישהו להתקשר.','מניחים את התינוק על האמה, פנים כלפי מטה, הראש נמוך מהגוף, ותומכים בלסת ולא בגרון.','נותנים 5 מכות חזקות בגב, בין השכמות, עם עקב כף היד.','אם לא יצא: הופכים אותו על הגב, הראש נמוך מהגוף, ונותנים 5 לחיצות על החזה. שתי אצבעות במחצית התחתונה של עצם החזה, בעומק של כשליש מהחזה.','ממשיכים לסירוגין 5 מכות בגב ו-5 לחיצות בחזה, עד שהחפץ יוצא או עד שהצוות מגיע.','אם התינוק מאבד הכרה: מתחילים החייאה לפי ההנחיות של 101.']),
+    h('h3',{style:'margin-top:14px'},'מה לא עושים'),
+    ul(['לא עושים לחיצות בטן (תמרון היימליך) לתינוק מתחת לגיל שנה.','לא מכניסים אצבע לפה כשלא רואים את החפץ.','לא תולים את התינוק הפוך מהרגליים.']),
+    h('p',{class:'hint'},'זה סיכום כללי ולא תחליף להדרכה. מומלץ מאוד לעבור קורס עזרה ראשונה והחייאה לתינוקות, למשל במד"א, ולבדוק שם את ההנחיות העדכניות.'),
+    h('button',{class:'btn ghost',onclick:close},'סגור'))})}
+const chokeBtn=()=>h('button',{class:'btn danger small',style:'margin-top:8px',onclick:chokeSheet},'מה עושים בחנק?');
+
+/* ---------- log a whole meal ---------- */
+function mealSheet(){sheet((sh,close)=>{
+  const sel=new Map();let form=FORMS[0],meal='';
+  const q=h('input',{type:'search',id:'ml-q',placeholder:'חפשו מאכל להוספה'});
+  const box=h('div',{class:'stack',style:'margin-top:8px;max-height:210px;overflow:auto'});
+  const chosen=h('div',{class:'stack',style:'margin-top:10px'});const warn=h('div',{style:'margin-top:8px'});
+  const fb=h('div',{class:'chips'}),mb=h('div',{class:'chips'});
+  const dt=h('input',{type:'date',id:'ml-date',value:iso()});const nt=h('textarea',{id:'ml-note',placeholder:'הערה לארוחה (לא חובה)'});
+  const drawBox=()=>{box.innerHTML='';const t=q.value.trim();
+    allFoods().filter(f=>!sel.has(f.id)&&(!t||f.name.includes(t))).slice(0,t?40:12).forEach(f=>box.append(h('button',{class:'food',onclick:()=>{sel.set(f.id,'love');drawAll()}},thumb(f),h('span',{class:'grow name'},f.name),tried(f.id)?h('span',{class:'tag g'},'ניסה'):h('span',{class:'tag'},'חדש'))))};
+  const drawChosen=()=>{chosen.innerHTML='';
+    sel.forEach((r,id)=>{const f=food(id);const rb=h('div',{class:'chips'},Object.keys(REACT).map(k=>h('button',{class:'chip','aria-pressed':r===k,onclick:()=>{sel.set(id,k);drawChosen()}},REACT[k])));
+      chosen.append(h('div',{class:'card stack',style:'padding:10px'},h('div',{class:'row'},thumb(f),h('b',{class:'grow'},f.name),h('button',{class:'x','aria-label':'הסר',onclick:()=>{sel.delete(id);drawAll()}},'×')),rb))});
+    warn.innerHTML='';const ids=[...sel.keys()].map(food);
+    const newA=new Set();ids.forEach(f=>f.al.forEach(c=>{if(!S.alg[c])newA.add(c)}));
+    if(newA.size>1)warn.append(h('div',{class:'notice bad',style:'margin-bottom:8px'},'בארוחה יש יותר מאלרגן חדש אחד ('+algNames([...newA])+'). מומלץ להכניס אלרגן אחד בכל פעם.'));
+    else if(newA.size===1)warn.append(h('div',{class:'notice',style:'margin-bottom:8px'},'אלרגן שעוד לא ניתן: '+algNames([...newA])+'. כדאי להמתין כמה ימים לפני האלרגן הבא.'));
+    const ws=ids.filter(f=>f.warn);if(ws.length)warn.append(h('div',{class:'notice'},ws.map(f=>h('div',null,f.name+': '+f.warn)),chokeBtn()))};
+  const drawF=()=>{fb.innerHTML='';FORMS.forEach(k=>fb.append(h('button',{class:'chip','aria-pressed':form===k,onclick:()=>{form=k;drawF()}},k)))};
+  const drawM=()=>{mb.innerHTML='';MEALS.forEach(([k,l])=>mb.append(h('button',{class:'chip','aria-pressed':meal===k,onclick:()=>{meal=meal===k?'':k;drawM()}},l)))};
+  const drawAll=()=>{drawBox();drawChosen()};
+  q.addEventListener('input',drawBox);
+  const today=planIds(new Date().getDay());
+  sh.append(h('h2',{style:'margin-top:0'},'רישום ארוחה'),h('p',{class:'muted',style:'margin:0 0 8px'},'בוחרים את כל המאכלים שבארוחה, ומסמנים תגובה לכל אחד.'),
+    today.length?h('button',{class:'btn soft small',onclick:()=>{today.forEach(id=>{if(!sel.has(id))sel.set(id,'love')});drawAll()}},'הוסף את התפריט של היום'):'',
+    h('div',{style:'margin-top:8px'},q),box,chosen,warn,
+    h('label',null,'באיזו צורה הוגש?'),fb,h('label',null,'איזו ארוחה? (לא חובה)'),mb,h('label',{for:'ml-date'},'תאריך'),dt,h('label',{for:'ml-note'},'הערה'),nt,
+    h('div',{class:'row',style:'margin-top:16px'},h('button',{class:'btn',onclick:()=>{
+      if(!sel.size){q.focus();return}
+      const d=dt.value||iso();
+      sel.forEach((r,id)=>{(S.logs[id]=S.logs[id]||[]).push({d,r,f:form,n:nt.value.trim(),m:meal});S.logs[id].sort((a,b)=>a.d<b.d?-1:1);bumpAlg(food(id),d)});
+      save();close();render()}},'שמור ארוחה'),h('button',{class:'btn ghost',onclick:close},'ביטול')));drawF();drawM();drawAll()})}
+
+</script>
+</body>
+</html>
